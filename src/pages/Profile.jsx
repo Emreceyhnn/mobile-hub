@@ -15,17 +15,21 @@ export default function Profile() {
     gender: profile?.gender || 'male',
     activityLevel: profile?.activityLevel || 'sedentary',
     dailyGoal: profile?.dailyGoal || 2000,
+    dailyWaterGoal: profile?.dailyWaterGoal || 2500,
   })
-
-  const [isCalculated, setIsCalculated] = useState(false)
 
   const handleCalculate = () => {
     const bmr = calculateBMR(form.weight, form.height, form.age, form.gender)
     const tdee = calculateTDEE(bmr, form.activityLevel)
     
-    setForm(p => ({ ...p, dailyGoal: tdee }))
-    setIsCalculated(true)
-    showToast(`BMR & TDEE hesaplandı! Yeni hedef: ${tdee} kcal 🎯`, 'info')
+    // Recommend water goal: weight * 35 ml
+    const recommendedWater = Math.round(form.weight * 35)
+    // Add 500ml extra if active/veryActive
+    const activityBonus = (form.activityLevel === 'active' || form.activityLevel === 'veryActive') ? 500 : 0
+    const finalWaterGoal = recommendedWater + activityBonus
+
+    setForm(p => ({ ...p, dailyGoal: tdee, dailyWaterGoal: finalWaterGoal }))
+    showToast(`BMR, TDEE ve Su Hedefi hesaplandı! Kalori: ${tdee} kcal, Su: ${finalWaterGoal} ml 🎯`, 'info')
   }
 
   const handleSave = async (e) => {
@@ -33,7 +37,7 @@ export default function Profile() {
     try {
       await updateUserProfile(form)
       showToast('Profil güncellendi! 🎉', 'success')
-    } catch (err) {
+    } catch {
       showToast('Güncelleme sırasında hata oluştu', 'error')
     }
   }
@@ -139,7 +143,7 @@ export default function Profile() {
 
         <div className="card">
           <h3 className="section-title">Günlük Hedefler</h3>
-          <div className="input-group">
+          <div className="input-group mb-12">
             <label className="input-label">Günlük Kalori Hedefi (kcal)</label>
             <input
               type="number"
@@ -147,6 +151,17 @@ export default function Profile() {
               value={form.dailyGoal}
               onChange={e => setForm(p => ({ ...p, dailyGoal: parseInt(e.target.value) || 0 }))}
               id="profile-daily-goal"
+              required
+            />
+          </div>
+          <div className="input-group">
+            <label className="input-label">Günlük Su Hedefi (ml)</label>
+            <input
+              type="number"
+              className="input"
+              value={form.dailyWaterGoal}
+              onChange={e => setForm(p => ({ ...p, dailyWaterGoal: parseInt(e.target.value) || 0 }))}
+              id="profile-daily-water-goal"
               required
             />
           </div>

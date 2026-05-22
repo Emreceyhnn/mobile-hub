@@ -16,9 +16,9 @@ export default function History() {
       if (!user) return
       try {
         const logs = await getWeeklyLogs(user.uid)
-        const formatted = Object.entries(logs).map(([dateKey, meals]) => {
-          const totals = sumMacros(meals)
-          return { dateKey, meals, totals }
+        const formatted = Object.entries(logs).map(([dateKey, dayLog]) => {
+          const totals = sumMacros(dayLog.meals)
+          return { dateKey, meals: dayLog.meals, water: dayLog.water, totals }
         }).sort((a, b) => b.dateKey.localeCompare(a.dateKey))
         
         setWeeklyData(formatted)
@@ -57,7 +57,8 @@ export default function History() {
         <h3 className="section-title">Son 7 Gün</h3>
         {weeklyData.map((day) => {
           const isSelected = selectedDayLog?.dateKey === day.dateKey
-          const hasLogged = day.totals.calories > 0
+          const hasCalories = day.totals.calories > 0
+          const hasWater = day.water > 0
           
           return (
             <div
@@ -74,11 +75,15 @@ export default function History() {
                 <div>
                   <h4 className="text-sm fw-700">{formatDate(day.dateKey)}</h4>
                   <span className="text-xs text-muted mt-4 block">
-                    {hasLogged ? `${day.totals.protein}g P · ${day.totals.carbs}g K · ${day.totals.fat}g Y` : 'Veri girilmedi'}
+                    {hasCalories 
+                      ? `${day.totals.protein}g P · ${day.totals.carbs}g K · ${day.totals.fat}g Y${hasWater ? ` · 💧 ${day.water} ml` : ''}`
+                      : hasWater 
+                        ? `💧 ${day.water} ml su tüketildi`
+                        : 'Veri girilmedi'}
                   </span>
                 </div>
                 <div className="text-right">
-                  <span className="text-base fw-800" style={{ color: hasLogged ? 'var(--accent-green)' : 'var(--text-muted)' }}>
+                  <span className="text-base fw-800" style={{ color: hasCalories ? 'var(--accent-green)' : 'var(--text-muted)' }}>
                     {day.totals.calories} kcal
                   </span>
                 </div>
@@ -94,6 +99,27 @@ export default function History() {
           <h3 className="text-base fw-700 mb-12">
             {formatDate(selectedDayLog.dateKey)} Detayları
           </h3>
+          
+          {selectedDayLog.water > 0 && (
+            <div style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              background: 'rgba(59, 130, 246, 0.1)',
+              border: '1px solid rgba(59, 130, 246, 0.2)',
+              borderRadius: 'var(--radius-md)',
+              padding: '12px 16px',
+              marginBottom: 16
+            }}>
+              <span className="text-sm fw-600" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <span>💧</span> Günlük Su Tüketimi
+              </span>
+              <span className="text-sm fw-800" style={{ color: 'var(--accent-blue)' }}>
+                {selectedDayLog.water} ml
+              </span>
+            </div>
+          )}
+
           <div className="divider" />
           {allMealsSelected.length === 0 ? (
             <p className="text-sm text-muted text-center" style={{ padding: '24px 0' }}>

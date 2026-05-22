@@ -6,7 +6,8 @@ import MacroBar from '../components/dashboard/MacroBar'
 import MealSection from '../components/food/MealSection'
 import Modal from '../components/ui/Modal'
 import AddFoodModal from '../components/food/AddFoodModal'
-import { getTodayKey, getDateKey } from '../services/firestore'
+import WaterCard from '../components/dashboard/WaterCard'
+import { getDateKey } from '../services/firestore'
 
 export default function Dashboard() {
   const { profile } = useAuth()
@@ -67,6 +68,11 @@ export default function Dashboard() {
         <div className="card mb-16">
           <h3 className="section-title">Bugünkü Makrolar</h3>
           <MacroBar totals={totals} />
+        </div>
+
+        {/* Water tracker overview */}
+        <div className="mb-16">
+          <WaterCard />
         </div>
 
         {/* Meals list */}
