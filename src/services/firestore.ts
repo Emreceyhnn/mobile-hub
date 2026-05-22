@@ -2,8 +2,7 @@ import {
   doc,
   getDoc,
   setDoc,
-  serverTimestamp,
-  FieldValue
+  serverTimestamp
 } from 'firebase/firestore'
 import { db } from './firebase'
 import { DayLog, FoodEntry, UserProfile } from '../types'

@@ -21,6 +21,15 @@ export interface DayLog {
   water: number;
 }
 
+export interface ReminderSettings {
+  enabled: boolean;
+  intervalHours: number;
+  startHour: number;
+  endHour: number;
+  remindWater: boolean;
+  remindFood: boolean;
+}
+
 export interface UserProfile {
   name: string;
   email: string;
@@ -31,4 +40,5 @@ export interface UserProfile {
   height: number;
   gender: 'male' | 'female';
   activityLevel: 'sedentary' | 'light' | 'moderate' | 'active' | 'veryActive';
+  reminders?: ReminderSettings;
 }

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAuth } from '../context/AuthContext'
 import { useToast } from '../components/ui/Toast'
 import { calculateBMR, calculateTDEE, ACTIVITY_LABELS } from '../utils/nutrition'
+import { NotificationService } from '../services/notificationService'
 
 export default function Profile() {
   const { profile, updateUserProfile, logout } = useAuth()
@@ -16,6 +17,14 @@ export default function Profile() {
     activityLevel: profile?.activityLevel || 'sedentary',
     dailyGoal: profile?.dailyGoal || 2000,
     dailyWaterGoal: profile?.dailyWaterGoal || 2500,
+    reminders: profile?.reminders || {
+      enabled: false,
+      intervalHours: 3,
+      startHour: 8,
+      endHour: 22,
+      remindWater: true,
+      remindFood: true,
+    }
   })
 
   const handleCalculate = () => {
@@ -30,6 +39,32 @@ export default function Profile() {
 
     setForm(p => ({ ...p, dailyGoal: tdee, dailyWaterGoal: finalWaterGoal }))
     showToast(`BMR, TDEE ve Su Hedefi hesaplandı! Kalori: ${tdee} kcal, Su: ${finalWaterGoal} ml 🎯`, 'info')
+  }
+
+  const handleReminderToggle = async () => {
+    const isCurrentlyEnabled = form.reminders?.enabled;
+    if (!isCurrentlyEnabled) {
+      const permission = await NotificationService.requestPermission();
+      if (permission === 'granted') {
+        setForm(p => ({
+          ...p,
+          reminders: { ...p.reminders, enabled: true }
+        }));
+        showToast('Bildirimler aktif hale getirildi! 🔔', 'success');
+      } else {
+        setForm(p => ({
+          ...p,
+          reminders: { ...p.reminders, enabled: false }
+        }));
+        showToast('Tarayıcı bildirim izni reddedildi. Lütfen tarayıcı ayarlarından izin verin.', 'error');
+      }
+    } else {
+      setForm(p => ({
+        ...p,
+        reminders: { ...p.reminders, enabled: false }
+      }));
+      showToast('Bildirimler kapatıldı.', 'info');
+    }
   }
 
   const handleSave = async (e) => {
@@ -165,6 +200,136 @@ export default function Profile() {
               required
             />
           </div>
+        </div>
+
+        <div className="card">
+          <h3 className="section-title">Hatırlatıcı Ayarları 🔔</h3>
+          
+          <div className="flex items-center justify-between mb-12" style={{ padding: '4px 0' }}>
+            <div>
+              <div className="fw-600 text-base">Bildirim Hatırlatıcıları</div>
+              <div className="text-xs text-muted mt-4">Su içme ve yemek yeme hatırlatıcılarını al</div>
+            </div>
+            <label className="switch-container" style={{ position: 'relative', display: 'inline-block', width: 44, height: 24, cursor: 'pointer' }}>
+              <input
+                type="checkbox"
+                checked={form.reminders?.enabled || false}
+                onChange={handleReminderToggle}
+                style={{ opacity: 0, width: 0, height: 0 }}
+                id="reminder-enabled-toggle"
+              />
+              <span className={`slider ${form.reminders?.enabled ? 'active' : ''}`} style={{
+                position: 'absolute', cursor: 'pointer', inset: 0,
+                backgroundColor: form.reminders?.enabled ? 'var(--accent-green)' : 'var(--bg-input)',
+                borderRadius: 24, transition: 'var(--transition)'
+              }}>
+                <span style={{
+                  position: 'absolute', content: '""', height: 16, width: 16, left: form.reminders?.enabled ? 25 : 3, bottom: 4,
+                  backgroundColor: '#fff', borderRadius: '50%', transition: 'var(--transition)'
+                }} />
+              </span>
+            </label>
+          </div>
+
+          {form.reminders?.enabled && (
+            <div className="slide-up" style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <div className="input-group">
+                <label className="input-label">Hatırlatma Sıklığı (Saat)</label>
+                <select
+                  className="input"
+                  value={form.reminders?.intervalHours || 3}
+                  onChange={e => setForm(p => ({
+                    ...p,
+                    reminders: { ...p.reminders, intervalHours: parseInt(e.target.value) || 3 }
+                  }))}
+                  id="reminder-interval"
+                >
+                  <option value="1">Her saat başı</option>
+                  <option value="2">2 saatte bir</option>
+                  <option value="3">3 saatte bir</option>
+                  <option value="4">4 saatte bir</option>
+                  <option value="6">6 saatte bir</option>
+                </select>
+              </div>
+
+              <div className="grid-2">
+                <div className="input-group">
+                  <label className="input-label">Başlangıç Saati</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="23"
+                    className="input"
+                    value={form.reminders?.startHour ?? 8}
+                    onChange={e => setForm(p => ({
+                      ...p,
+                      reminders: { ...p.reminders, startHour: Math.max(0, Math.min(23, parseInt(e.target.value) || 0)) }
+                    }))}
+                    id="reminder-start-hour"
+                  />
+                </div>
+                <div className="input-group">
+                  <label className="input-label">Bitiş Saati (Sessiz)</label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="23"
+                    className="input"
+                    value={form.reminders?.endHour ?? 22}
+                    onChange={e => setForm(p => ({
+                      ...p,
+                      reminders: { ...p.reminders, endHour: Math.max(0, Math.min(23, parseInt(e.target.value) || 0)) }
+                    }))}
+                    id="reminder-end-hour"
+                  />
+                </div>
+              </div>
+
+              <div className="divider" />
+
+              <div className="flex flex-col gap-12" style={{ padding: '4px 0' }}>
+                <label className="flex items-center gap-8 text-sm cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={form.reminders?.remindWater ?? true}
+                    onChange={e => setForm(p => ({
+                      ...p,
+                      reminders: { ...p.reminders, remindWater: e.target.checked }
+                    }))}
+                    id="reminder-remind-water"
+                    style={{ accentColor: 'var(--accent-green)', width: 16, height: 16 }}
+                  />
+                  💧 Su İçme Hatırlatıcısı
+                </label>
+
+                <label className="flex items-center gap-8 text-sm cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={form.reminders?.remindFood ?? true}
+                    onChange={e => setForm(p => ({
+                      ...p,
+                      reminders: { ...p.reminders, remindFood: e.target.checked }
+                    }))}
+                    id="reminder-remind-food"
+                    style={{ accentColor: 'var(--accent-green)', width: 16, height: 16 }}
+                  />
+                  🍎 Yemek Yeme Hatırlatıcısı
+                </label>
+              </div>
+
+              <button
+                type="button"
+                className="btn btn-secondary btn-full mt-4"
+                onClick={() => {
+                  NotificationService.sendTest();
+                  showToast('Test bildirimi gönderildi! 🚀', 'success');
+                }}
+                id="test-notification-btn"
+              >
+                Test Bildirimi Gönder 🚀
+              </button>
+            </div>
+          )}
         </div>
 
         <button type="submit" className="btn btn-primary btn-full" id="save-profile-btn">
