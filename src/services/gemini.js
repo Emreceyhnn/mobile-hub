@@ -47,7 +47,7 @@ Tüm sayısal değerler float olmalı.
     return JSON.parse(text)
   } catch (e) {
     console.error("JSON Parse Error:", text)
-    throw new Error("Yapay zeka geçersiz bir yanıt döndürdü.")
+    throw new Error("Yapay zeka geçersiz bir yanıt döndürdü.", { cause: e })
   }
 }
 
@@ -99,6 +99,6 @@ SADECE aşağıdaki JSON formatında yanıt ver:
     return JSON.parse(text)
   } catch (e) {
     console.error("JSON Parse Error:", text)
-    throw new Error("Yapay zeka geçersiz bir yanıt döndürdü.")
+    throw new Error("Yapay zeka geçersiz bir yanıt döndürdü.", { cause: e })
   }
 }

@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { getCaloriePercent } from '../../utils/nutrition'
+import { Box, Typography, Chip } from '@mui/material'
 
 const SIZE = 200
 const STROKE = 16
@@ -19,12 +20,11 @@ export default function DailyRing({ consumed, goal }) {
     fill.style.strokeDashoffset = offset
   }, [percent])
 
-  const color = over ? '#EF4444' : percent > 80 ? '#F59E0B' : '#00D9A3'
   const gradId = 'ringGrad'
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
-      <div style={{ position: 'relative', width: SIZE, height: SIZE }}>
+    <Box display="flex" flexDirection="column" alignItems="center" gap={2} >
+      <Box sx={{ position: 'relative', width: SIZE, height: SIZE }}>
         <svg width={SIZE} height={SIZE} className="progress-ring">
           <defs>
             <linearGradient id={gradId} x1="0%" y1="0%" x2="100%" y2="100%">
@@ -35,18 +35,17 @@ export default function DailyRing({ consumed, goal }) {
 
           {/* Track */}
           <circle
-            className="progress-ring-bg"
             cx={SIZE / 2}
             cy={SIZE / 2}
             r={R}
             strokeWidth={STROKE}
-            stroke="var(--bg-card-hover)"
+            stroke="rgba(255,255,255,0.05)"
+            fill="transparent"
           />
 
           {/* Fill */}
           <circle
             ref={fillRef}
-            className="progress-ring-fill"
             cx={SIZE / 2}
             cy={SIZE / 2}
             r={R}
@@ -54,47 +53,62 @@ export default function DailyRing({ consumed, goal }) {
             stroke={`url(#${gradId})`}
             strokeDasharray={CIRC}
             strokeDashoffset={CIRC}
+            fill="transparent"
+            strokeLinecap="round"
+            style={{ transition: 'stroke-dashoffset 0.5s ease-in-out' }}
           />
         </svg>
 
         {/* Center label */}
-        <div style={{
-          position: 'absolute', inset: 0,
-          display: 'flex', flexDirection: 'column',
-          alignItems: 'center', justifyContent: 'center',
-          gap: 2,
-        }}>
-          <span style={{
-            fontSize: 36, fontWeight: 900,
-            background: over ? 'linear-gradient(135deg,#EF4444,#F59E0B)' : 'var(--gradient-hero)',
-            WebkitBackgroundClip: 'text',
-            WebkitTextFillColor: 'transparent',
-            backgroundClip: 'text',
-            lineHeight: 1,
-          }}>
-            {consumed.toLocaleString('tr-TR')}
-          </span>
-          <span style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 500 }}>
-            kcal tüketildi
-          </span>
-          <div style={{
-            marginTop: 4,
-            padding: '2px 10px',
-            borderRadius: 999,
-            background: over ? 'rgba(239,68,68,0.15)' : 'var(--accent-green-dim)',
-            color: over ? 'var(--accent-red)' : 'var(--accent-green)',
-            fontSize: 12,
-            fontWeight: 600,
-          }}>
-            {over ? `+${(consumed - goal).toLocaleString('tr-TR')} fazla` : `${remaining.toLocaleString('tr-TR')} kaldı`}
-          </div>
-        </div>
-      </div>
+        <Box sx={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0 }}>
+          <Box sx={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%, -50%)', width: 'max-content' }}>
+            <Typography 
+              variant="h3" 
+              fontWeight="900" 
+              lineHeight={1}
+              sx={{
+                background: over ? 'linear-gradient(135deg,#EF4444,#F59E0B)' : (theme) => theme.palette.gradients.secondaryText,
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                backgroundClip: 'text',
+                m: 0,
+                p: 0
+              }}
+            >
+              {consumed.toLocaleString('tr-TR')}
+            </Typography>
+          </Box>
+          
+          <Box 
+            sx={{
+              position: 'absolute',
+              top: 'calc(50% + 28px)', // Positioned exactly below the h3 text
+              left: '50%',
+              transform: 'translateX(-50%)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              gap: 1,
+              width: 'max-content'
+            }}
+          >
+            <Typography variant="caption" color="text.secondary" fontWeight="bold">
+              kcal tüketildi
+            </Typography>
+            <Chip 
+              size="small" 
+              label={over ? `+${(consumed - goal).toLocaleString('tr-TR')} fazla` : `${remaining.toLocaleString('tr-TR')} kaldı`}
+              color={over ? 'error' : 'success'}
+              sx={{ fontWeight: 'bold', height: 20, fontSize: '0.65rem' }}
+            />
+          </Box>
+        </Box>
+      </Box>
 
       {/* Goal label */}
-      <p style={{ color: 'var(--text-secondary)', fontSize: 13 }}>
-        Günlük hedef: <strong style={{ color: 'var(--text-primary)' }}>{goal.toLocaleString('tr-TR')} kcal</strong>
-      </p>
-    </div>
+      <Typography variant="body2" color="text.secondary">
+        Günlük hedef: <Typography component="span" variant="body2" color="text.primary" fontWeight="bold">{goal.toLocaleString('tr-TR')} kcal</Typography>
+      </Typography>
+    </Box>
   )
 }

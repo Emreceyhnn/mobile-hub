@@ -1,10 +1,16 @@
 import { useState, useRef } from 'react'
 import { useGemini } from '../../hooks/useGemini'
 import { useToast } from '../ui/Toast'
-import LoadingSpinner from '../ui/LoadingSpinner'
+import { 
+  Box, Typography, Button, TextField, ButtonGroup, CircularProgress, Grid, Paper, Stack 
+} from '@mui/material'
+import SmartToyIcon from '@mui/icons-material/SmartToy'
+import PhotoCameraIcon from '@mui/icons-material/PhotoCamera'
+import EditIcon from '@mui/icons-material/Edit'
+import UploadFileIcon from '@mui/icons-material/UploadFile'
 
-export default function AddFoodModal({ mealType, onClose, onAdd }) {
-  const { loading, error, result, analyze, analyzeImage, reset } = useGemini()
+export default function AddFoodModal({ onClose, onAdd }) {
+  const { loading, result, analyze, analyzeImage, reset } = useGemini()
   const showToast = useToast()
   
   const [activeTab, setActiveTab] = useState('ai') // 'ai' | 'image' | 'manual'
@@ -98,85 +104,97 @@ export default function AddFoodModal({ mealType, onClose, onAdd }) {
     onClose()
   }
 
-  return (
-    <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-      {/* Tab Selector */}
-      <div className="segment">
-        <button
-          className={`segment-btn ${activeTab === 'ai' ? 'active' : ''}`}
-          onClick={() => { setActiveTab('ai'); reset(); }}
-        >
-          🤖 Yapay Zeka
-        </button>
-        <button
-          className={`segment-btn ${activeTab === 'image' ? 'active' : ''}`}
-          onClick={() => { setActiveTab('image'); reset(); }}
-        >
-          📸 Fotoğraf
-        </button>
-        <button
-          className={`segment-btn ${activeTab === 'manual' ? 'active' : ''}`}
-          onClick={() => { setActiveTab('manual'); reset(); }}
-        >
-          ✍️ Manuel Giriş
-        </button>
-      </div>
+  function setFormKey(key, value) {
+    setManualForm(p => ({ ...p, [key]: value }))
+  }
 
-      {loading && <LoadingSpinner text="Yemeğin analiz ediliyor..." />}
+  return (
+    <Stack spacing={3}>
+      {/* Tab Selector */}
+      <ButtonGroup fullWidth variant="outlined" sx={{ '& .MuiButton-root': { borderRadius: 2 } }}>
+        <Button 
+          variant={activeTab === 'ai' ? 'contained' : 'outlined'}
+          onClick={() => { setActiveTab('ai'); reset(); }}
+          startIcon={<SmartToyIcon />}
+        >
+          Yapay Zeka
+        </Button>
+        <Button 
+          variant={activeTab === 'image' ? 'contained' : 'outlined'}
+          onClick={() => { setActiveTab('image'); reset(); }}
+          startIcon={<PhotoCameraIcon />}
+        >
+          Fotoğraf
+        </Button>
+        <Button 
+          variant={activeTab === 'manual' ? 'contained' : 'outlined'}
+          onClick={() => { setActiveTab('manual'); reset(); }}
+          startIcon={<EditIcon />}
+        >
+          Manuel
+        </Button>
+      </ButtonGroup>
+
+      {loading && (
+        <Box display="flex" flexDirection="column" alignItems="center" gap={2} py={4}>
+          <CircularProgress color="primary" />
+          <Typography variant="body2" color="text.secondary">Yemeğin analiz ediliyor...</Typography>
+        </Box>
+      )}
 
       {!loading && (
         <>
           {activeTab === 'ai' && !result && (
-            <form onSubmit={handleAiSearch} style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-              <div className="input-group">
-                <label className="input-label">Ne yedin ya da ne içtin?</label>
-                <textarea
-                  className="input"
-                  style={{ minHeight: 100, resize: 'none' }}
+            <form onSubmit={handleAiSearch}>
+              <Stack spacing={2}>
+                <TextField
+                  label="Ne yedin ya da ne içtin?"
+                  multiline
+                  rows={4}
                   placeholder="Örn: 1 tabak kuru fasulye, 1 kase yoğurt ve 1 kase pirinç pilavı yedim"
                   value={query}
                   onChange={e => setQuery(e.target.value)}
-                  id="ai-food-input"
+                  fullWidth
+                  variant="outlined"
                   required
                 />
-              </div>
-              <button type="submit" className="btn btn-primary btn-full" id="ai-analyze-btn">
-                Besin Değerlerini Hesapla ⚡
-              </button>
+                <Button type="submit" variant="contained" color="primary" size="large" sx={{ borderRadius: 2 }}>
+                  Besin Değerlerini Hesapla ⚡
+                </Button>
+              </Stack>
             </form>
           )}
 
           {activeTab === 'image' && !result && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-              <div
-                style={{
-                  border: '2px dashed var(--border)',
-                  borderRadius: 'var(--radius-lg)',
-                  padding: 24,
+            <Stack spacing={2}>
+              <Paper
+                variant="outlined"
+                sx={{
+                  borderStyle: 'dashed',
+                  borderWidth: 2,
+                  borderColor: 'divider',
+                  borderRadius: 3,
+                  p: 3,
                   textAlign: 'center',
                   cursor: 'pointer',
-                  background: 'var(--bg-card)',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  gap: 12
+                  bgcolor: 'background.default',
+                  '&:hover': { borderColor: 'primary.main', bgcolor: 'action.hover' }
                 }}
                 onClick={() => fileInputRef.current.click()}
               >
                 {imagePreview ? (
-                  <img
+                  <Box 
+                    component="img"
                     src={imagePreview}
                     alt="Preview"
-                    style={{ maxHeight: 180, borderRadius: 'var(--radius-md)', objectFit: 'cover' }}
+                    sx={{ maxHeight: 180, borderRadius: 2, objectFit: 'cover', width: '100%' }}
                   />
                 ) : (
-                  <>
-                    <span style={{ fontSize: 40 }}>📸</span>
-                    <div>
-                      <p className="text-sm fw-600">Yemeğin fotoğrafını yükle</p>
-                      <p className="text-xs text-muted mt-4">Kameradan çek veya galeriden seç</p>
-                    </div>
-                  </>
+                  <Box display="flex" flexDirection="column" alignItems="center" gap={1}>
+                    <UploadFileIcon sx={{ fontSize: 48, color: 'text.secondary' }} />
+                    <Typography variant="subtitle2" fontWeight="bold">Yemeğin fotoğrafını yükle</Typography>
+                    <Typography variant="caption" color="text.secondary">Kameradan çek veya galeriden seç</Typography>
+                  </Box>
                 )}
                 <input
                   type="file"
@@ -185,134 +203,145 @@ export default function AddFoodModal({ mealType, onClose, onAdd }) {
                   ref={fileInputRef}
                   onChange={handleImageChange}
                 />
-              </div>
+              </Paper>
 
               {imagePreview && (
-                <div className="flex gap-12">
-                  <button
-                    className="btn btn-secondary flex-1"
+                <Stack direction="row" spacing={2}>
+                  <Button 
+                    variant="outlined" 
+                    color="inherit" 
+                    fullWidth 
                     onClick={() => { setImagePreview(null); setSelectedImage(null); }}
+                    sx={{ borderRadius: 2 }}
                   >
                     Temizle
-                  </button>
-                  <button className="btn btn-primary flex-1" onClick={handleImageAnalyze}>
+                  </Button>
+                  <Button 
+                    variant="contained" 
+                    color="primary" 
+                    fullWidth 
+                    onClick={handleImageAnalyze}
+                    sx={{ borderRadius: 2 }}
+                  >
                     Gemini ile Analiz Et ⚡
-                  </button>
-                </div>
+                  </Button>
+                </Stack>
               )}
-            </div>
+            </Stack>
           )}
 
           {/* AI Result Review or Manual Form */}
           {(result || activeTab === 'manual') && (
-            <div className="fade-in" style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+            <Stack spacing={2} sx={{ animation: 'fadeIn 0.3s ease-in' }}>
               {result && (
-                <div className="gemini-badge" style={{ alignSelf: 'flex-start' }}>
+                <Box 
+                  bgcolor="primary.light" 
+                  color="primary.dark" 
+                  px={2} 
+                  py={1} 
+                  borderRadius={2} 
+                  display="inline-block" 
+                  alignSelf="flex-start"
+                  fontSize="0.875rem"
+                  fontWeight="bold"
+                >
                   🤖 Gemini API Analiz Sonucu
-                </div>
+                </Box>
               )}
 
-              <div className="input-group">
-                <label className="input-label">Yiyecek Adı</label>
-                <input
-                  type="text"
-                  className="input"
-                  value={manualForm.name}
-                  onChange={e => setFormKey('name', e.target.value)}
-                  id="food-name-input"
-                  required
-                />
-              </div>
+              <TextField
+                label="Yiyecek Adı"
+                variant="outlined"
+                fullWidth
+                value={manualForm.name}
+                onChange={e => setFormKey('name', e.target.value)}
+                required
+              />
 
-              <div className="grid-2">
-                <div className="input-group">
-                  <label className="input-label">Porsiyon</label>
-                  <input
-                    type="text"
-                    className="input"
+              <Grid container spacing={2}>
+                <Grid item xs={6}>
+                  <TextField
+                    label="Porsiyon"
+                    variant="outlined"
+                    fullWidth
                     value={manualForm.servingSize}
                     onChange={e => setFormKey('servingSize', e.target.value)}
-                    id="food-serving-input"
                   />
-                </div>
-                <div className="input-group">
-                  <label className="input-label">Kalori (kcal)</label>
-                  <input
+                </Grid>
+                <Grid item xs={6}>
+                  <TextField
+                    label="Kalori (kcal)"
                     type="number"
-                    className="input"
+                    variant="outlined"
+                    fullWidth
                     value={manualForm.calories}
                     onChange={e => setFormKey('calories', e.target.value)}
-                    id="food-calories-input"
                     required
                   />
-                </div>
-              </div>
+                </Grid>
+              </Grid>
 
-              <div className="grid-4">
-                <div className="input-group">
-                  <label className="input-label" style={{ fontSize: 11 }}>Protein (g)</label>
-                  <input
+              <Grid container spacing={1.5}>
+                <Grid item xs={3}>
+                  <TextField
+                    label="Protein(g)"
                     type="number"
-                    className="input"
-                    style={{ padding: 8 }}
+                    variant="outlined"
+                    fullWidth
+                    size="small"
                     value={manualForm.protein}
                     onChange={e => setFormKey('protein', e.target.value)}
-                    id="food-protein-input"
                   />
-                </div>
-                <div className="input-group">
-                  <label className="input-label" style={{ fontSize: 11 }}>Karbo (g)</label>
-                  <input
+                </Grid>
+                <Grid item xs={3}>
+                  <TextField
+                    label="Karbo(g)"
                     type="number"
-                    className="input"
-                    style={{ padding: 8 }}
+                    variant="outlined"
+                    fullWidth
+                    size="small"
                     value={manualForm.carbs}
                     onChange={e => setFormKey('carbs', e.target.value)}
-                    id="food-carbs-input"
                   />
-                </div>
-                <div className="input-group">
-                  <label className="input-label" style={{ fontSize: 11 }}>Yağ (g)</label>
-                  <input
+                </Grid>
+                <Grid item xs={3}>
+                  <TextField
+                    label="Yağ(g)"
                     type="number"
-                    className="input"
-                    style={{ padding: 8 }}
+                    variant="outlined"
+                    fullWidth
+                    size="small"
                     value={manualForm.fat}
                     onChange={e => setFormKey('fat', e.target.value)}
-                    id="food-fat-input"
                   />
-                </div>
-                <div className="input-group">
-                  <label className="input-label" style={{ fontSize: 11 }}>Lif (g)</label>
-                  <input
+                </Grid>
+                <Grid item xs={3}>
+                  <TextField
+                    label="Lif(g)"
                     type="number"
-                    className="input"
-                    style={{ padding: 8 }}
+                    variant="outlined"
+                    fullWidth
+                    size="small"
                     value={manualForm.fiber}
                     onChange={e => setFormKey('fiber', e.target.value)}
-                    id="food-fiber-input"
                   />
-                </div>
-              </div>
+                </Grid>
+              </Grid>
 
-              <div className="flex gap-12 mt-12">
+              <Stack direction="row" spacing={2} mt={2}>
                 {result && (
-                  <button className="btn btn-secondary flex-1" onClick={reset}>
+                  <Button variant="outlined" color="inherit" fullWidth onClick={reset} sx={{ borderRadius: 2 }}>
                     Yeniden Dene
-                  </button>
+                  </Button>
                 )}
-                <button className="btn btn-primary flex-1" onClick={handleSave} id="save-food-btn">
+                <Button variant="contained" color="primary" fullWidth onClick={handleSave} sx={{ borderRadius: 2 }}>
                   Besin Ekle 🎉
-                </button>
-              </div>
-            </div>
+                </Button>
+              </Stack>
+            </Stack>
           )}
         </>
       )}
-    </div>
+    </Stack>
   )
-
-  function setFormKey(key, value) {
-    setManualForm(p => ({ ...p, [key]: value }))
-  }
 }

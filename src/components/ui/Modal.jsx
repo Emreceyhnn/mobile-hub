@@ -1,42 +1,37 @@
-import { useEffect, useRef } from 'react'
+import { Dialog, DialogTitle, DialogContent, IconButton } from '@mui/material'
+import CloseIcon from '@mui/icons-material/Close'
 
 export default function Modal({ isOpen, onClose, title, children }) {
-  const overlayRef = useRef()
-
-  useEffect(() => {
-    if (isOpen) {
-      document.body.style.overflow = 'hidden'
-    } else {
-      document.body.style.overflow = ''
-    }
-    return () => { document.body.style.overflow = '' }
-  }, [isOpen])
-
-  if (!isOpen) return null
-
   return (
-    <div
-      className="modal-overlay"
-      ref={overlayRef}
-      onClick={(e) => { if (e.target === overlayRef.current) onClose() }}
+    <Dialog 
+      open={isOpen} 
+      onClose={onClose}
+      fullWidth
+      maxWidth="sm"
+      PaperProps={{
+        sx: {
+          borderRadius: 3,
+          m: 2
+        }
+      }}
     >
-      <div className="modal-sheet">
-        <div className="modal-handle" />
-        <div className="modal-header">
-          <span className="modal-title">{title}</span>
-          <button
-            className="btn btn-ghost btn-icon"
+      <DialogTitle sx={{ m: 0, p: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        {title}
+        {onClose ? (
+          <IconButton
+            aria-label="close"
             onClick={onClose}
-            id="modal-close-btn"
-            aria-label="Kapat"
+            sx={{
+              color: (theme) => theme.palette.grey[500],
+            }}
           >
-            ✕
-          </button>
-        </div>
-        <div className="modal-body">
-          {children}
-        </div>
-      </div>
-    </div>
+            <CloseIcon />
+          </IconButton>
+        ) : null}
+      </DialogTitle>
+      <DialogContent dividers sx={{ p: 2 }}>
+        {children}
+      </DialogContent>
+    </Dialog>
   )
 }

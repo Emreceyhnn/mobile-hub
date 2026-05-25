@@ -1,38 +1,35 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useCallback } from 'react'
+import { Snackbar, Alert } from '@mui/material'
 
 const ToastContext = createContext(null)
 
 export function ToastProvider({ children }) {
-  const [toasts, setToasts] = useState([])
+  const [open, setOpen] = useState(false)
+  const [message, setMessage] = useState('')
+  const [severity, setSeverity] = useState('success') // 'success' | 'error' | 'info' | 'warning'
 
-  const show = useCallback((message, type = 'success', duration = 3000) => {
-    const id = Date.now()
-    setToasts(prev => [...prev, { id, message, type }])
-    setTimeout(() => {
-      setToasts(prev => prev.map(t => t.id === id ? { ...t, removing: true } : t))
-      setTimeout(() => {
-        setToasts(prev => prev.filter(t => t.id !== id))
-      }, 250)
-    }, duration)
+  const show = useCallback((msg, type = 'success') => {
+    setMessage(msg)
+    setSeverity(type)
+    setOpen(true)
   }, [])
 
-  const icons = { success: '✓', error: '✕', info: 'ℹ' }
+  const handleClose = (event, reason) => {
+    if (reason === 'clickaway') {
+      return
+    }
+    setOpen(false)
+  }
 
   return (
     <ToastContext.Provider value={{ show }}>
       {children}
-      <div className="toast-container" aria-live="polite">
-        {toasts.map(t => (
-          <div
-            key={t.id}
-            className={`toast toast-${t.type}${t.removing ? ' removing' : ''}`}
-            role="alert"
-          >
-            <span style={{ fontWeight: 700, fontSize: 16 }}>{icons[t.type]}</span>
-            <span>{t.message}</span>
-          </div>
-        ))}
-      </div>
+      <Snackbar open={open} autoHideDuration={3000} onClose={handleClose} anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }} sx={{ mb: 8 }}>
+        <Alert onClose={handleClose} severity={severity} variant="filled" sx={{ width: '100%', borderRadius: 2 }}>
+          {message}
+        </Alert>
+      </Snackbar>
     </ToastContext.Provider>
   )
 }

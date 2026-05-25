@@ -1,15 +1,36 @@
 import { ReminderSettings } from '../types';
+import { getToken } from 'firebase/messaging';
+import { messaging } from './firebase';
 
 export const NotificationService = {
   /**
-   * Request browser permission to show desktop notifications.
+   * Request browser permission to show desktop notifications and get FCM Token.
    */
-  async requestPermission(): Promise<NotificationPermission> {
+  async requestPermissionAndGetToken(): Promise<string | null> {
     if (!('Notification' in window)) {
       console.warn('This browser does not support desktop notifications.');
-      return 'denied';
+      return null;
     }
-    return await Notification.requestPermission();
+    
+    const permission = await Notification.requestPermission();
+    if (permission !== 'granted') {
+      return null;
+    }
+
+    try {
+      const currentToken = await getToken(messaging, {
+        // vapidKey: 'YOUR_PUBLIC_VAPID_KEY_HERE' // Add your VAPID key here if required by your project settings
+      });
+      if (currentToken) {
+        return currentToken;
+      } else {
+        console.warn('No registration token available. Request permission to generate one.');
+        return null;
+      }
+    } catch (err) {
+      console.error('An error occurred while retrieving token. ', err);
+      return null;
+    }
   },
 
   /**

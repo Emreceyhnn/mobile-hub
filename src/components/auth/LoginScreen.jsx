@@ -1,6 +1,13 @@
 import { useState } from 'react'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../ui/Toast'
+import { 
+  Box, Typography, TextField, Button, Paper, Stack, Divider, CircularProgress, ButtonGroup, InputAdornment 
+} from '@mui/material'
+import PersonIcon from '@mui/icons-material/Person'
+import EmailIcon from '@mui/icons-material/Email'
+import LockIcon from '@mui/icons-material/Lock'
+import RocketLaunchIcon from '@mui/icons-material/RocketLaunch'
 
 export default function LoginScreen() {
   const { loginWithEmail, registerWithEmail, loginWithGoogle, loginAsDemo } = useAuth()
@@ -66,23 +73,23 @@ export default function LoginScreen() {
   }
 
   return (
-    <div style={{
-      minHeight: '100dvh',
+    <Box sx={{
+      minHeight: '100vh',
       display: 'flex',
       flexDirection: 'column',
-      background: 'var(--bg-primary)',
+      bgcolor: 'background.default',
       position: 'relative',
       overflow: 'hidden',
     }}>
       {/* Background blobs */}
-      <div style={{
+      <Box sx={{
         position: 'absolute', top: '-20%', left: '-20%',
         width: '60vw', height: '60vw', maxWidth: 320, maxHeight: 320,
         borderRadius: '50%',
         background: 'radial-gradient(circle, rgba(0,217,163,0.15) 0%, transparent 70%)',
         pointerEvents: 'none',
       }} />
-      <div style={{
+      <Box sx={{
         position: 'absolute', bottom: '10%', right: '-10%',
         width: '50vw', height: '50vw', maxWidth: 280, maxHeight: 280,
         borderRadius: '50%',
@@ -91,161 +98,173 @@ export default function LoginScreen() {
       }} />
 
       {/* Hero */}
-      <div style={{ padding: '72px 32px 40px', textAlign: 'center' }}>
-        <div style={{
-          fontSize: 64,
-          marginBottom: 16,
-          filter: 'drop-shadow(0 0 20px rgba(0,217,163,0.4))'
-        }}>🥗</div>
-        <h1 style={{
-          fontSize: 32, fontWeight: 900,
+      <Box sx={{ pt: 9, pb: 5, px: 4, textAlign: 'center' }}>
+        <Typography sx={{ fontSize: 64, mb: 2, filter: 'drop-shadow(0 0 20px rgba(0,217,163,0.4))' }}>
+          🥗
+        </Typography>
+        <Typography variant="h4" fontWeight="900" sx={{
           background: 'var(--gradient-hero)',
           WebkitBackgroundClip: 'text',
           WebkitTextFillColor: 'transparent',
-          backgroundClip: 'text',
-          marginBottom: 8,
-        }}>NutriTrack</h1>
-        <p style={{ color: 'var(--text-secondary)', fontSize: 15 }}>
+          mb: 1
+        }}>
+          NutriTrack
+        </Typography>
+        <Typography variant="body2" color="text.secondary">
           Yapay zeka destekli besin takip uygulaması
-        </p>
-      </div>
+        </Typography>
+      </Box>
 
       {/* Card */}
-      <div style={{
+      <Paper sx={{
         flex: 1,
-        background: 'var(--bg-secondary)',
-        borderRadius: '28px 28px 0 0',
-        border: '1px solid var(--border)',
-        borderBottom: 'none',
-        padding: '28px 24px 40px',
+        borderRadius: '32px 32px 0 0',
+        px: 3,
+        pt: 4,
+        pb: 5,
         display: 'flex',
         flexDirection: 'column',
-        gap: 20,
+        gap: 3,
+        bgcolor: 'rgba(22, 26, 39, 0.7)',
+        backdropFilter: 'blur(32px)',
+        WebkitBackdropFilter: 'blur(32px)',
+        borderTop: '1px solid rgba(255,255,255,0.08)',
+        position: 'relative',
+        zIndex: 1,
+        boxShadow: '0 -12px 48px rgba(0,0,0,0.2)'
       }}>
         {/* Segment */}
-        <div className="segment">
-          <button
-            className={`segment-btn${mode === 'login' ? ' active' : ''}`}
+        <ButtonGroup fullWidth variant="outlined" sx={{ '& .MuiButton-root': { borderRadius: 3, py: 1 } }}>
+          <Button 
+            variant={mode === 'login' ? 'contained' : 'outlined'}
             onClick={() => setMode('login')}
-            id="login-tab-btn"
-          >Giriş Yap</button>
-          <button
-            className={`segment-btn${mode === 'register' ? ' active' : ''}`}
-            onClick={() => setMode('register')}
-            id="register-tab-btn"
-          >Kayıt Ol</button>
-        </div>
-
-        <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-          {mode === 'register' && (
-            <div className="input-group">
-              <label className="input-label">Ad Soyad</label>
-              <div className="input-icon-wrap">
-                <span className="input-icon">👤</span>
-                <input
-                  className="input"
-                  type="text"
-                  placeholder="Adın Soyadın"
-                  value={form.name}
-                  onChange={e => update('name', e.target.value)}
-                  id="register-name-input"
-                  required
-                />
-              </div>
-            </div>
-          )}
-
-          <div className="input-group">
-            <label className="input-label">E-posta</label>
-            <div className="input-icon-wrap">
-              <span className="input-icon">✉️</span>
-              <input
-                className="input"
-                type="email"
-                placeholder="ornek@mail.com"
-                value={form.email}
-                onChange={e => update('email', e.target.value)}
-                id="email-input"
-                required
-              />
-            </div>
-          </div>
-
-          <div className="input-group">
-            <label className="input-label">Şifre</label>
-            <div className="input-icon-wrap">
-              <span className="input-icon">🔒</span>
-              <input
-                className="input"
-                type="password"
-                placeholder="••••••••"
-                value={form.password}
-                onChange={e => update('password', e.target.value)}
-                id="password-input"
-                required
-                minLength={6}
-              />
-            </div>
-          </div>
-
-          <button
-            type="submit"
-            className="btn btn-primary btn-full"
-            id="auth-submit-btn"
-            disabled={loading}
-            style={{ marginTop: 4 }}
           >
-            {loading
-              ? <span className="spinner" style={{ width: 20, height: 20 }} />
-              : mode === 'login' ? 'Giriş Yap' : 'Hesap Oluştur'
-            }
-          </button>
+            Giriş Yap
+          </Button>
+          <Button 
+            variant={mode === 'register' ? 'contained' : 'outlined'}
+            onClick={() => setMode('register')}
+          >
+            Kayıt Ol
+          </Button>
+        </ButtonGroup>
+
+        <form onSubmit={handleSubmit}>
+          <Stack spacing={2}>
+            {mode === 'register' && (
+              <TextField
+                label="Ad Soyad"
+                variant="outlined"
+                fullWidth
+                value={form.name}
+                onChange={e => update('name', e.target.value)}
+                required
+                InputProps={{
+                  startAdornment: <InputAdornment position="start"><PersonIcon color="action" /></InputAdornment>,
+                }}
+              />
+            )}
+
+            <TextField
+              label="E-posta"
+              type="email"
+              variant="outlined"
+              fullWidth
+              value={form.email}
+              onChange={e => update('email', e.target.value)}
+              required
+              InputProps={{
+                startAdornment: <InputAdornment position="start"><EmailIcon color="action" /></InputAdornment>,
+              }}
+            />
+
+            <TextField
+              label="Şifre"
+              type="password"
+              variant="outlined"
+              fullWidth
+              value={form.password}
+              onChange={e => update('password', e.target.value)}
+              required
+              inputProps={{ minLength: 6 }}
+              InputProps={{
+                startAdornment: <InputAdornment position="start"><LockIcon color="action" /></InputAdornment>,
+              }}
+            />
+
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              size="large"
+              disabled={loading}
+              sx={{ borderRadius: 3, py: 1.5, mt: 1, fontWeight: 'bold' }}
+            >
+              {loading ? <CircularProgress size={24} color="inherit" /> : (mode === 'login' ? 'Giriş Yap' : 'Hesap Oluştur')}
+            </Button>
+          </Stack>
         </form>
 
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
-          <div className="divider" style={{ flex: 1, margin: 0 }} />
-          <span style={{ color: 'var(--text-muted)', fontSize: 12 }}>ya da</span>
-          <div className="divider" style={{ flex: 1, margin: 0 }} />
-        </div>
+        <Box display="flex" alignItems="center" gap={2}>
+          <Divider sx={{ flex: 1 }} />
+          <Typography variant="caption" color="text.disabled">ya da</Typography>
+          <Divider sx={{ flex: 1 }} />
+        </Box>
 
-        <button
-          className="btn btn-secondary btn-full"
-          onClick={handleGoogle}
-          id="google-login-btn"
-          disabled={loading}
-          style={{ gap: 10 }}
-        >
-          <svg width="18" height="18" viewBox="0 0 18 18">
-            <path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/>
-            <path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/>
-            <path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z"/>
-            <path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z"/>
-          </svg>
-          Google ile Devam Et
-        </button>
+        <Stack spacing={1.5}>
+          <Button
+            variant="outlined"
+            color="inherit"
+            fullWidth
+            size="large"
+            onClick={handleGoogle}
+            disabled={loading}
+            sx={{ borderRadius: 3, py: 1.5 }}
+            startIcon={
+              <svg width="18" height="18" viewBox="0 0 18 18">
+                <path fill="#4285F4" d="M16.51 8H8.98v3h4.3c-.18 1-.74 1.48-1.6 2.04v2.01h2.6a7.8 7.8 0 0 0 2.38-5.88c0-.57-.05-.66-.15-1.18z"/>
+                <path fill="#34A853" d="M8.98 17c2.16 0 3.97-.72 5.3-1.94l-2.6-2a4.8 4.8 0 0 1-7.18-2.54H1.83v2.07A8 8 0 0 0 8.98 17z"/>
+                <path fill="#FBBC05" d="M4.5 10.52a4.8 4.8 0 0 1 0-3.04V5.41H1.83a8 8 0 0 0 0 7.18l2.67-2.07z"/>
+                <path fill="#EA4335" d="M8.98 4.18c1.17 0 2.23.4 3.06 1.2l2.3-2.3A8 8 0 0 0 1.83 5.4L4.5 7.49a4.77 4.77 0 0 1 4.48-3.3z"/>
+              </svg>
+            }
+          >
+            Google ile Devam Et
+          </Button>
 
-        <button
-          className="btn btn-full"
-          onClick={() => {
-            loginAsDemo()
-            showToast('Demo Modu Aktif! 🎉 Tüm özellikleri test edebilirsiniz.', 'success')
-          }}
-          id="demo-login-btn"
-          style={{
-            background: 'linear-gradient(135deg, rgba(0, 217, 163, 0.1), rgba(139, 92, 246, 0.1))',
-            color: 'var(--accent-green)',
-            border: '1.5px dashed var(--accent-green)',
-            fontWeight: 700
-          }}
-        >
-          🚀 Demo Modu ile Hemen Giriş Yap
-        </button>
+          <Button
+            variant="outlined"
+            fullWidth
+            size="large"
+            onClick={() => {
+              loginAsDemo()
+              showToast('Demo Modu Aktif! 🎉 Tüm özellikleri test edebilirsiniz.', 'success')
+            }}
+            startIcon={<RocketLaunchIcon />}
+            sx={{
+              borderRadius: 3,
+              py: 1.5,
+              borderStyle: 'dashed',
+              borderWidth: 1.5,
+              borderColor: 'success.main',
+              color: 'success.main',
+              bgcolor: 'success.50',
+              fontWeight: 'bold',
+              '&:hover': {
+                borderStyle: 'dashed',
+                borderWidth: 1.5,
+                bgcolor: 'success.100'
+              }
+            }}
+          >
+            Demo Modu ile Hemen Giriş Yap
+          </Button>
+        </Stack>
 
-        <p style={{ textAlign: 'center', fontSize: 12, color: 'var(--text-muted)' }}>
-          Devam ederek{' '}
-          <span style={{ color: 'var(--accent-green)' }}>Gizlilik Politikası</span>'nı kabul etmiş olursunuz
-        </p>
-      </div>
-    </div>
+        <Typography variant="caption" color="text.secondary" textAlign="center" mt={1}>
+          Devam ederek <Typography component="span" variant="caption" color="primary.main" sx={{ cursor: 'pointer' }}>Gizlilik Politikası</Typography>'nı kabul etmiş olursunuz
+        </Typography>
+      </Paper>
+    </Box>
   )
 }

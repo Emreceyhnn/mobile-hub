@@ -2,6 +2,12 @@ import { useState } from 'react'
 import { useNutrition } from '../../context/NutritionContext'
 import { useAuth } from '../../context/AuthContext'
 import { useToast } from '../ui/Toast'
+import { Box, Card, CardContent, Typography, Button, TextField, IconButton, Stack, CircularProgress } from '@mui/material'
+import WaterDropIcon from '@mui/icons-material/WaterDrop'
+import AddIcon from '@mui/icons-material/Add'
+import UndoIcon from '@mui/icons-material/Undo'
+import CheckIcon from '@mui/icons-material/Check'
+import CloseIcon from '@mui/icons-material/Close'
 
 export default function WaterCard() {
   const { profile } = useAuth()
@@ -42,132 +48,134 @@ export default function WaterCard() {
   }
 
   return (
-    <div className="card" style={{ padding: '20px 16px' }} id="water-tracker-card">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h4 className="text-base fw-800" style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-            <span>💧</span> Su Takibi
-          </h4>
-          <p className="text-xs text-muted mt-4">Günlük su dengenizi koruyun</p>
-        </div>
-        <div style={{ textAlign: 'right' }}>
-          <span className="text-lg fw-900" style={{ color: 'var(--accent-blue)' }}>
-            {water.toLocaleString('tr-TR')}
-          </span>
-          <span className="text-xs text-muted"> / {goal.toLocaleString('tr-TR')} ml</span>
-          <span 
-            className="text-xs fw-700 block" 
-            style={{ 
-              color: percent >= 100 ? 'var(--accent-green)' : 'var(--accent-blue)',
-              marginTop: 2
-            }}
-          >
-            %{percent} Tamamlandı
-          </span>
-        </div>
-      </div>
+    <Card sx={{ borderRadius: '12px', bgcolor: 'rgba(22, 26, 39, 0.6)', border: '1px solid rgba(255,255,255,0.05)' }}>
+      <CardContent sx={{ p: 3, '&:last-child': { pb: 3 } }}>
+        <Box display="flex" justifyContent="space-between" alignItems="flex-start" mb={3}>
+          <Box>
+            <Typography variant="subtitle1" fontWeight="800" display="flex" alignItems="center" gap={1}>
+              <WaterDropIcon color="info" /> Su Takibi
+            </Typography>
+            <Typography variant="caption" color="text.secondary">Günlük su dengenizi koruyun</Typography>
+          </Box>
+          <Box textAlign="right">
+            <Typography variant="h6" fontWeight="900" color="info.main" sx={{ lineHeight: 1.2 }}>
+              {water.toLocaleString('tr-TR')}
+            </Typography>
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 0.5 }}>
+              / {goal.toLocaleString('tr-TR')} ml
+            </Typography>
+            <Typography variant="caption" fontWeight="bold" color={percent >= 100 ? 'success.main' : 'info.main'} sx={{ display: 'inline-block', bgcolor: (theme) => `${theme.palette.info.main}22`, px: 1, py: 0.25, borderRadius: 1 }}>
+              %{percent} Tamamlandı
+            </Typography>
+          </Box>
+        </Box>
 
-      <div className="water-card-content">
-        {/* Animated Glass Visual */}
-        <div className="water-visual" aria-label="Su kabı göstergesi" role="img">
-          <div className="water-fill" style={{ height: `${percent}%` }}>
-            {percent > 0 && (
-              <>
-                <div className="water-wave" />
-                <div className="water-wave-back" />
-              </>
-            )}
-          </div>
-        </div>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mb: 3 }}>
+          <Box sx={{ position: 'relative', display: 'inline-flex' }}>
+            <CircularProgress variant="determinate" value={100} size={100} thickness={4} sx={{ color: 'action.hover' }} />
+            <CircularProgress variant="determinate" value={percent} size={100} thickness={4} color="info" sx={{ position: 'absolute', left: 0 }} />
+            <Box
+              sx={{
+                top: 0,
+                left: 0,
+                bottom: 0,
+                right: 0,
+                position: 'absolute',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center'
+              }}
+            >
+              <Typography variant="h5" component="div" color="info.main" fontWeight="bold">
+                {percent}%
+              </Typography>
+            </Box>
+          </Box>
+        </Box>
 
-        {/* Action Controls */}
-        <div className="water-actions">
+        <Box>
           {!showCustomInput ? (
-            <>
-              <div className="water-quick-grid">
-                <button
-                  type="button"
-                  className="btn-water"
+            <Stack spacing={1}>
+              <Stack direction="row" spacing={1}>
+                <Button 
+                  variant="outlined" 
+                  color="info" 
+                  fullWidth 
                   onClick={() => handleAddWater(250)}
-                  id="add-water-250"
-                  aria-label="250 ml su ekle"
+                  startIcon={<AddIcon />}
+                  sx={{ borderRadius: 2 }}
                 >
-                  +250 ml
-                </button>
-                <button
-                  type="button"
-                  className="btn-water"
+                  250 ml
+                </Button>
+                <Button 
+                  variant="outlined" 
+                  color="info" 
+                  fullWidth 
                   onClick={() => handleAddWater(500)}
-                  id="add-water-500"
-                  aria-label="500 ml su ekle"
+                  startIcon={<AddIcon />}
+                  sx={{ borderRadius: 2 }}
                 >
-                  +500 ml
-                </button>
-              </div>
-              <div className="water-quick-grid">
-                <button
-                  type="button"
-                  className="btn-water"
+                  500 ml
+                </Button>
+              </Stack>
+              <Stack direction="row" spacing={1}>
+                <Button 
+                  variant="text" 
+                  color="info" 
+                  fullWidth 
                   onClick={() => setShowCustomInput(true)}
-                  id="add-water-custom-trigger"
-                  aria-label="Özel su miktarı ekle"
                 >
                   Özel ➕
-                </button>
-                <button
-                  type="button"
-                  className="btn-water btn-water-undo"
+                </Button>
+                <Button 
+                  variant="text" 
+                  color="inherit" 
+                  fullWidth 
                   onClick={handleUndo}
                   disabled={water <= 0}
-                  id="undo-water"
-                  aria-label="Son su eklemeyi geri al"
+                  startIcon={<UndoIcon />}
                 >
-                  Geri Al ↩
-                </button>
-              </div>
-            </>
+                  Geri Al
+                </Button>
+              </Stack>
+            </Stack>
           ) : (
-            <form onSubmit={handleCustomSubmit} style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <div style={{ display: 'flex', gap: 6 }}>
-                <input
-                  type="number"
-                  className="input"
-                  placeholder="Miktar (ml)"
-                  value={customVal}
-                  onChange={e => setCustomVal(e.target.value)}
-                  style={{ padding: '8px 12px', fontSize: 13, height: 38 }}
-                  id="custom-water-input"
-                  autoFocus
-                  required
-                />
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  style={{ padding: '0 12px', width: 38, height: 38, borderRadius: 'var(--radius-md)' }}
-                  id="custom-water-submit-btn"
-                  aria-label="Kaydet"
-                >
-                  ✓
-                </button>
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => {
-                    setCustomVal('')
-                    setShowCustomInput(false)
-                  }}
-                  style={{ padding: '0 12px', width: 38, height: 38, borderRadius: 'var(--radius-md)' }}
-                  id="custom-water-cancel-btn"
-                  aria-label="İptal et"
-                >
-                  ✕
-                </button>
-              </div>
-              <span className="text-xs text-muted text-center">ml cinsinden değer girin</span>
+            <form onSubmit={handleCustomSubmit}>
+              <Stack spacing={1}>
+                <Stack direction="row" spacing={1}>
+                  <TextField
+                    type="number"
+                    variant="outlined"
+                    size="small"
+                    placeholder="Miktar (ml)"
+                    value={customVal}
+                    onChange={e => setCustomVal(e.target.value)}
+                    autoFocus
+                    required
+                    fullWidth
+                  />
+                  <IconButton type="submit" color="primary" sx={{ bgcolor: 'primary.light', borderRadius: 2 }}>
+                    <CheckIcon />
+                  </IconButton>
+                  <IconButton 
+                    onClick={() => {
+                      setCustomVal('')
+                      setShowCustomInput(false)
+                    }}
+                    color="error"
+                    sx={{ bgcolor: 'error.light', borderRadius: 2 }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </Stack>
+                <Typography variant="caption" color="text.secondary" textAlign="center">
+                  ml cinsinden değer girin
+                </Typography>
+              </Stack>
             </form>
           )}
-        </div>
-      </div>
-    </div>
+        </Box>
+      </CardContent>
+    </Card>
   )
 }
